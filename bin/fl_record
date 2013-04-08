@@ -1,0 +1,41 @@
+#!/bin/bash
+
+ps -C fl_check_webcam -C fl_check_epiphan -C fl_check_incru -C fl_check_record -C fl_record ho pid | grep -v "^[ \t]*$$$" | xargs --no-run-if-empty kill
+
+
+echo "do it"
+
+
+rootvideo=~/Bureau/video-FL11
+filefmt="video-stream-%Y_%b_%d_%H:%M:%m.mkv"
+filename=$(date +"$filefmt")
+filepath="${rootvideo}/${filename}"
+
+gst-launch-0.10 -e videomixer name=mix \
+   ! ffmpegcolorspace \
+   ! x264enc pass=4 quantizer=23 threads=0 \
+   ! queue \
+   ! mux. \
+   v4l2src device=/dev/webcam-dufour \
+     ! ffmpegcolorspace \
+     ! video/x-raw-yuv,width=320, height=240,format=\(fourcc\)AYUV  \
+     ! videobox border-alpha=1.0 bottom=-2 right=-2 \
+     ! mix. \
+   v4lsrc device=/dev/video1 \
+     ! ffmpegcolorspace \
+     ! video/x-raw-yuv,width=800, height=600,format=\(fourcc\)AYUV \
+     ! videobox border-alpha=0 top=0 left=-322 \
+     ! mix. \
+   multifilesrc location="/opt/fetonslinux/image/fl_video_thumb.jpg" caps="image/jpeg,framerate=1/1" \
+     ! jpegdec \
+     ! ffmpegcolorspace\
+     ! video/x-raw-yuv,format=\(fourcc\)AYUV \
+     ! videobox border-alpha=1.0 right=-2 \
+     ! videobox border-alpha=0 top=-242 left=0 \
+     ! mix. \
+   pulsesrc ! audioconvert \
+      ! 'audio/x-raw-int,rate=44100,channels=2' \
+      ! faac tns=true \
+      ! queue \
+      ! ffmux_mp4 name=mux \
+   mux. ! filesink location=${filepath}

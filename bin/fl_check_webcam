@@ -1,0 +1,8 @@
+#!/bin/bash
+
+ps -C fl_check_webcam -C fl_check_epiphan -C fl_check_incru -C fl_check_record -C fl_record ho pid | grep -v "^[ \t]*$$$" | xargs --no-run-if-empty kills
+
+
+
+gst-launch-0.10 v4l2src device=/dev/webcam-dufour ! xvimagesink
+

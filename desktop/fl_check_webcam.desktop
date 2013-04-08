@@ -1,0 +1,9 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Name=check_webcam
+Exec=/opt/fetonslinux/bin/fl_check_webcam
+Terminal=true
+Type=Application
+Icon=/usr/share/icons/gnome/scalable/devices/camera-web.svg
+

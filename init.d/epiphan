@@ -1,0 +1,7 @@
+#!/bin/bash
+
+modprobe usbvideo
+modprobe videodev
+
+#epiphan module
+insmod /opt/fetonslinux/kernel_module/vga2usb.ko tune_interval=300 grab_flags=0 v4l_num_buffers=2

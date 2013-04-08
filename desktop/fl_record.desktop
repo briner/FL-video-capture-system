@@ -1,0 +1,8 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Name=fl_record
+Exec=/opt/fetonslinux/bin/fl_record
+Terminal=true
+Type=Application
+Icon=/usr/share/icons/gnome/scalable/actions/media-record.svg

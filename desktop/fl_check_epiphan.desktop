@@ -1,0 +1,8 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Name=check_epiphan
+Exec=/opt/fetonslinux/bin/fl_check_epiphan
+Terminal=true
+Type=Application
+Icon=/opt/fetonslinux/image/epipan.png

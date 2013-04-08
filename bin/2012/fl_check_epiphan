@@ -1,0 +1,8 @@
+#!/bin/bash
+
+
+ps -C fl_check_webcam -C fl_check_epiphan -C fl_check_incru -C fl_check_record -C fl_record ho pid | grep -v "^[ \t]*$$$" | xargs --no-run-if-empty kill
+
+
+gst-launch-0.10 -e v4lsrc  device=/dev/video1 ! xvimagesink
+

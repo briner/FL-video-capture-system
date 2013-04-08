@@ -1,0 +1,9 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Name=check_incru
+Exec=/opt/fetonslinux/bin/fl_check_incru
+Terminal=true
+Type=Application
+Icon=/opt/fetonslinux/image/incrustation.svg
+
