@@ -1,0 +1,154 @@
+# ===
+# Installation des pre-requis:
+# marche pas ...sudo apt-get install istanbul `aptitude -w 2000 search gstreamer | cut -b5-60 | xargs -eol`
+# apt-get install $(apt-cache search --names-only gstreamer0.10-plugins |  egrep -v 'dbg|doc' | awk '{print $1}' | xargs -eol)
+# apt-get install instanbul ; # pour istximages
+# wget -q http://key-mon.googlecode.com/files/keymon_1.2.2_all.deb
+# sudo dpkg -i keymon_1.2.2_all.deb
+# rm keymon_1.2.2_all.deb
+# ===
+
+------ epiphan 
+#!! with kernel  2.6.32-31-generic
+cd ~/incru/epiphan
+sudo modprobe usbvideo
+sudo modprobe videodev
+sudo insmod vga2usb.ko tune_interval=300 grab_flags=0 v4l_num_buffers=2
+#nm vga2usb.ko | grep buffers
+
+lsmod | grep vga
+lsmod | grep usb
+
+LC_ALL=C gst-launch-0.10 v4lsrc  device=/dev/video2 ! xvimagesink
+
+----------------------------------------------------
+
+
+
+
+ok avec epiphan sur video2
+mplayer -tv device=/dev/video2:driver=v4l:outfmt=bgr24 -fps 5  tv://
+
+ok
+ gst-launch-0.10 -e videomixer name=mix ! ffmpegcolorspace ! xvimagesink \
+   videotestsrc  ! video/x-raw-yuv, framerate=1/1, width=350, height=250 ! \
+     textoverlay font-desc="Sans 24" text="CAM1" valign=top halign=left shaded-background=true ! \
+     videobox border-alpha=0 top=-200 left=-50 ! mix. \
+   multifilesrc location="pluto.jpg" caps="image/jpeg,framerate=1/1" ! jpegdec ! \
+     textoverlay font-desc="Sans 26" text="cours linux" halign=left shaded-background=true auto-resize=false ! \
+     ffmpegcolorspace ! video/x-raw-yuv,format=\(fourcc\)AYUV ! mix.
+
+ok cam
+gst-launch-0.10 v4l2src ! videoscale ! video/x-raw-yuv,height=240 ! ffmpegcolorspace ! autovideosink
+
+ok cam
+gst-launch-0.10 v4l2src device=/dev/video1 ! videoscale ! video/x-raw-yuv,height=240 ! ffmpegcolorspace ! autovideosink
+
+ok epiphan
+gst-launch-0.10 v4lsrc device=/dev/video2 ! videoscale ! video/x-raw-yuv,height=240 ! ffmpegcolorspace ! autovideosink
+
+
+
+OK
+ gst-launch-0.10 -e videomixer name=mix ! ffmpegcolorspace ! xvimagesink \
+   v4l2src device=/dev/video1 ! videoscale ! video/x-raw-yuv,width=350, height=250 ! \
+     textoverlay font-desc="Sans 24" text="CAM1" valign=top halign=left shaded-background=true ! \
+     videobox border-alpha=0 top=-200 left=-50 ! mix. \
+   videotestsrc pattern="snow" ! video/x-raw-yuv, framerate=1/1, width=350, height=250 ! \
+     textoverlay font-desc="Sans 24" text="CAM2" valign=top halign=left shaded-background=true ! \
+     videobox border-alpha=0 top=-200 left=-450 ! mix. \
+   multifilesrc location="pluto.jpg" caps="image/jpeg,framerate=1/1" ! jpegdec ! \
+     textoverlay font-desc="Sans 26" text="Live from Pluto" halign=left shaded-background=true auto-resize=false ! \
+     ffmpegcolorspace ! video/x-raw-yuv,format=\(fourcc\)AYUV ! mix.
+
+ok cam + epiphan
+ gst-launch-0.10 -e videomixer name=mix ! ffmpegcolorspace ! xvimagesink \
+   v4l2src device=/dev/video1 ! videoscale ! video/x-raw-yuv,width=350, height=250 ! \
+     textoverlay font-desc="Sans 24" text="CAM1" valign=top halign=left shaded-background=true ! \
+     videobox border-alpha=0 top=-200 left=-50 ! mix. \
+   v4lsrc device=/dev/video2 ! videoscale ! video/x-raw-yuv,width=350, height=250 ! \
+     videobox border-alpha=0 top=-200 left=-450 ! mix. \
+   multifilesrc location="pluto.jpg" caps="image/jpeg,framerate=1/1" ! jpegdec ! \
+     textoverlay font-desc="Sans 26" text="Live from Pluto" halign=left shaded-background=true auto-resize=false ! \
+     ffmpegcolorspace ! video/x-raw-yuv,format=\(fourcc\)AYUV ! mix.
+
+ok cam + epiphan + better disposition
+ gst-launch-0.10 -e videomixer name=mix ! ffmpegcolorspace ! xvimagesink \
+   v4l2src device=/dev/video1 ! videoscale ! video/x-raw-yuv,width=350, height=250 ! \
+     videobox border-alpha=0 top=0 left=0 ! mix. \
+   v4lsrc device=/dev/video2 ! videoscale ! video/x-raw-yuv,width=800, height=600 ! \
+     videobox border-alpha=0 top=0 left=-350 ! mix. \
+   multifilesrc location="pluto.jpg" caps="image/jpeg,framerate=1/1" ! jpegdec ! \
+     textoverlay font-desc="Sans 26" text="Live from Pluto" halign=left shaded-background=true auto-resize=false ! \
+     ffmpegcolorspace ! video/x-raw-yuv,format=\(fourcc\)AYUV ! mix.
+
+ok cam + epiphan + best disposition
+ gst-launch-0.10 -e videomixer name=mix ! ffmpegcolorspace ! xvimagesink \
+   v4l2src device=/dev/video1 ! videoscale ! video/x-raw-yuv,width=320, height=240 ! \
+     videobox border-alpha=0 top=0 left=0 ! mix. \
+   v4lsrc device=/dev/video2 ! videoscale ! video/x-raw-yuv,width=800, height=600 ! \
+     videobox border-alpha=0 top=0 left=-320 ! mix. \
+   multifilesrc location="test_320_360.jpg" caps="image/jpeg,framerate=1/1" ! jpegdec ! \
+     videobox border-alpha=0 top=-240 left=0 ! \
+     ffmpegcolorspace ! video/x-raw-yuv,format=\(fourcc\)AYUV ! mix.
+
+#ok rearrange the code
+ gst-launch-0.10 -e videomixer name=mix ! ffmpegcolorspace ! xvimagesink \
+   v4l2src device=/dev/video1 \
+     ! videoscale \
+     ! video/x-raw-yuv,width=320, height=240 \
+     ! videobox border-alpha=0 top=0 left=0 \
+     ! mix. \
+   v4lsrc device=/dev/video2 \
+     ! videoscale \
+     ! video/x-raw-yuv,width=800, height=600 \
+     ! videobox border-alpha=0 top=0 left=-320 \
+     ! mix. \
+   multifilesrc location="test_320_360.jpg" caps="image/jpeg,framerate=1/1" \
+     ! jpegdec \
+     ! videobox border-alpha=0 top=-240 left=0 \
+     ! ffmpegcolorspace\
+     ! video/x-raw-yuv,format=\(fourcc\)AYUV \
+     ! mix.
+
+#ok with nice border
+ gst-launch-0.10 -e videomixer name=mix ! ffmpegcolorspace ! xvimagesink \
+   v4l2src device=/dev/video1 \
+     ! videoscale \
+     ! video/x-raw-yuv,width=320, height=240 \
+     ! videobox border-alpha=1.0 bottom=-2 right=-2 \
+     ! videobox border-alpha=0 top=0 left=0 \
+     ! mix. \
+   v4lsrc device=/dev/video2 \
+     ! videoscale \
+     ! video/x-raw-yuv,width=800, height=600 \
+     ! videobox border-alpha=0 top=0 left=-322 \
+     ! mix. \
+   multifilesrc location="test_320_360.jpg" caps="image/jpeg,framerate=1/1" \
+     ! jpegdec \
+     ! videobox border-alpha=1.0 right=-2 \
+     ! videobox border-alpha=0 top=-242 left=0 \
+     ! ffmpegcolorspace\
+     ! video/x-raw-yuv,format=\(fourcc\)AYUV \
+     ! mix.
+--------------------------------------------------
+ gst-launch-0.10 -e videomixer name=mix ! ffmpegcolorspace ! xvimagesink \
+   v4l2src device=/dev/video1 \
+     ! videoscale \
+     ! video/x-raw-yuv,width=320, height=240 \
+     ! videobox border-alpha=1.0 bottom=-2 right=-2 \
+     ! videobox border-alpha=0 top=0 left=0 \
+     ! mix. \
+   v4lsrc device=/dev/video2 \
+     ! videoscale \
+     ! video/x-raw-yuv,width=800, height=600 \
+     ! videobox border-alpha=0 top=0 left=-322 \
+     ! mix. \
+   multifilesrc location="test_320_360.jpg" caps="image/jpeg,framerate=1/1" \
+     ! jpegdec \
+     ! videobox border-alpha=1.0 right=-2 \
+     ! videobox border-alpha=0 top=-242 left=0 \
+     ! ffmpegcolorspace\
+     ! video/x-raw-yuv,format=\(fourcc\)AYUV \
+     ! mix.
+

@@ -1,0 +1,80 @@
+# ok works
+gst-launch -tv  \
+   v4l2src device=/dev/video1  \
+     ! videoscale  \
+     ! queue   \
+     ! video/x-raw-yuv,width=320,height=200  \
+     ! ffmpegcolorspace  \
+     ! x264enc  \
+     ! mpegtsmux  \
+     ! udpsink host=127.0.0.1 port=2345 sync=false async=false
+
+#puis
+vlc udp://@:2345
+
+#ok video
+ gst-launch-0.10 -etv videomixer name=mix \
+   ! ffmpegcolorspace \
+   ! x264enc pass=4 quantizer=16 threads=0 \
+   ! queue \
+   ! mpegtsmux ! udpsink host=127.0.0.1 port=2345 sync=false async=false \
+     v4l2src device=/dev/video1 \
+       ! ffmpegcolorspace \
+       ! video/x-raw-yuv,width=320, height=240,format=\(fourcc\)AYUV  \
+       ! videobox border-alpha=1.0 bottom=-2 right=-2 \
+       ! mix. \
+     v4lsrc device=/dev/video2 \
+       ! ffmpegcolorspace \
+       ! video/x-raw-yuv,width=800, height=600,format=\(fourcc\)AYUV \
+       ! videobox border-alpha=0 top=0 left=-322 \
+       ! mix. \
+     multifilesrc location="test_320_360.jpg" caps="image/jpeg,framerate=1/1" \
+       ! jpegdec \
+       ! ffmpegcolorspace\
+       ! video/x-raw-yuv,format=\(fourcc\)AYUV \
+       ! videobox border-alpha=1.0 right=-2 \
+       ! videobox border-alpha=0 top=-242 left=0 \
+       ! mix.
+
+#puis
+vlc udp://@:2345
+
+#ok with video + sound 
+ gst-launch-0.10 -ev videomixer name=mix \
+   ! ffmpegcolorspace \
+   ! x264enc pass=4 quantizer=21 threads=0 \
+   ! queue \
+   ! mux. \
+     v4l2src device=/dev/video1 \
+       ! ffmpegcolorspace \
+       ! video/x-raw-yuv,width=320, height=240,format=\(fourcc\)AYUV  \
+       ! videobox border-alpha=1.0 bottom=-2 right=-2 \
+       ! mix. \
+     v4lsrc device=/dev/video2 \
+       ! ffmpegcolorspace \
+       ! video/x-raw-yuv,width=800, height=600,format=\(fourcc\)AYUV \
+       ! videobox border-alpha=0 top=0 left=-322 \
+       ! mix. \
+     multifilesrc location="test_320_360.jpg" caps="image/jpeg,framerate=1/1" \
+       ! jpegdec \
+       ! ffmpegcolorspace\
+       ! video/x-raw-yuv,format=\(fourcc\)AYUV \
+       ! videobox border-alpha=1.0 right=-2 \
+       ! videobox border-alpha=0 top=-242 left=0 \
+       ! mix. \
+     pulsesrc ! audioconvert \
+        ! 'audio/x-raw-int,rate=44100,channels=2' \
+        ! faac tns=true \
+        ! queue \
+        ! mpegtsmux name=mux \
+   mux. ! udpsink host=127.0.0.1 port=2345 sync=false async=false
+
+#puis
+vlc -I dummy udp://@:2345 --sout '#rtp{mux=ts,dst=224.0.1.10,port=50005,sdp=sap,name="TEST-MCAST-BRINER"}' --ttl 5 --loop
+
+#puis
+# vlc >> sap >> TEST-BRINER
+#ou
+vlc -vvv -I dummy udp://@:2345 --sout '#standard{access=http,mux=ts,dst=129.194.20.106:3456}'
+vlc http://129.194.20.106:3456
+
