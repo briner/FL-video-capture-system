@@ -1,0 +1,17 @@
+# This file maintains persistent names for network interfaces.
+# See udev(7) for syntax.
+#
+# Entries are automatically added by the 75-persistent-net-generator.rules
+# file; however you are also free to add your own entries.
+
+KERNEL=="video*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="09a4",  SYMLINK+="webcam-dufour"
+KERNEL=="video*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="0819",  SYMLINK+="webcam-boulot"
+KERNEL=="video*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="08b2",  SYMLINK+="webcam-aepli"
+#KERNEL=="video*", ATTRS{idVendor}=="5555", ATTRS{idProduct}=="1110",  SYMLINK+="webcam-epiphan"
+
+#
+#SUBSYSTEMS=="video4linux", KERNEL=="video?", ATTRS{ID_V4L_PRODUCT}=="Epiphan VGA2USB #V2U13497", SYMLINK+="webcam-epiphan"
+SUBSYSTEM=="video4linux", KERNEL=="video*", ATTRS{ID_V4L_PRODUCT}=="Epiphan VGA2USB #V2U13497", SYMLINK+="ZZZ"
+
+
+
